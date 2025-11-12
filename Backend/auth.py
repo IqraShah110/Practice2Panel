@@ -688,7 +688,9 @@ def google_authorize():
         allowed_frontend_origins = {
             FRONTEND_URL.rstrip('/'),
             'http://localhost:3000',
-            'http://127.0.0.1:3000'
+            'http://127.0.0.1:3000',
+            'https://practice2panel-frontend-8ptb.onrender.com',  # Production frontend URL
+            'https://practice2panel-frontend.onrender.com'  # Fallback
         }
 
         request_origin = request.headers.get('Origin')
@@ -785,7 +787,9 @@ def google_callback():
         allowed_frontend_origins = {
             FRONTEND_URL.rstrip('/'),
             'http://localhost:3000',
-            'http://127.0.0.1:3000'
+            'http://127.0.0.1:3000',
+            'https://practice2panel-frontend-8ptb.onrender.com',  # Production frontend URL
+            'https://practice2panel-frontend.onrender.com'  # Fallback
         }
 
         stored_redirect_uri = session.get('oauth_redirect_uri')
