@@ -74,8 +74,8 @@ CORS(app,
 # Register auth blueprint
 app.register_blueprint(auth_bp)
 
-# Root route
-@app.route('/', methods=['GET'])
+# Root route - also used for health checks
+@app.route('/', methods=['GET', 'HEAD'])
 def root():
     return jsonify({
         'message': 'Practice2Panel API is running',
@@ -276,14 +276,23 @@ def process_voice():
             'message': f'Server error during voice processing: {str(e)}'
         }), 500
 
-@app.route('/api/health', methods=['GET'])
+@app.route('/api/health', methods=['GET', 'HEAD'])
 def health_check():
-    """Health check endpoint"""
+    """Health check endpoint - responds quickly for Render health checks"""
+    try:
+        # Quick database connection test (with timeout)
+        conn = get_pg_connection()
+        conn.close()
+        db_status = 'connected'
+    except:
+        db_status = 'disconnected'
+    
     return jsonify({
         'success': True,
         'message': 'API is running',
-        'status': 'healthy'
-    })
+        'status': 'healthy',
+        'database': db_status
+    }), 200
 
 def build_context_info(context):
     """Build context information string from context dict."""
