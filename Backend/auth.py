@@ -910,6 +910,7 @@ def google_callback():
                     session['user_id'] = user_id
                     session['email'] = db_email
                     session['full_name'] = db_full_name
+                    session.permanent = True  # Make session persistent
                     
                     return jsonify({
                         'success': True,

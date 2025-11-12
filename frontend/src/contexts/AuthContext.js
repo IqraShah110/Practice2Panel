@@ -73,8 +73,10 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (data.success) {
-        setUser(data.user);
-        setAuthenticated(true);
+        // Wait a moment for session cookie to be set
+        await new Promise(resolve => setTimeout(resolve, 300));
+        // Verify session is set by calling checkAuth
+        await checkAuth();
         return { success: true, message: data.message };
       } else {
         return { success: false, message: data.message };
@@ -113,6 +115,14 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
+      
+      if (data.success) {
+        // After signup, user needs to verify email, so don't set authenticated yet
+        // But verify session is working
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await checkAuth();
+      }
+      
       return { success: data.success, message: data.message, user_id: data.user_id };
     } catch (error) {
       console.error('Signup error:', error);

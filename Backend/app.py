@@ -59,6 +59,12 @@ app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'practice2panel:'
 app.config['PERMANENT_SESSION_LIFETIME'] = 2592000  # 30 days in seconds
 
+# Configure session cookies for cross-origin requests
+app.config['SESSION_COOKIE_SECURE'] = True  # Only send over HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Allow cross-site requests
+app.config['SESSION_COOKIE_DOMAIN'] = None  # Let browser set domain automatically
+
 # Initialize Flask-Session
 Session(app)
 
@@ -70,7 +76,7 @@ allowed_origins = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'https://practice2panel-frontend-8ptb.onrender.com',  # Production frontend URL
-    'https://practice2panel-frontend.onrender.com'  # Fallback for other deployments
+   
 ]
 
 CORS(app, 
