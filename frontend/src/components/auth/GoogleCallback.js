@@ -42,17 +42,10 @@ const GoogleCallback = () => {
           // Wait a moment for session cookie to be set
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Refresh auth state - try multiple times to ensure session is detected
-          let authChecked = false;
-          for (let i = 0; i < 3; i++) {
-            await checkAuth();
-            // Check if we're now authenticated
-            await new Promise(resolve => setTimeout(resolve, 300));
-            // Re-check auth status by calling checkAuth again
-            if (i < 2) {
-              await new Promise(resolve => setTimeout(resolve, 200));
-            }
-          }
+          // Refresh auth state - try a couple times to ensure session is detected
+          await checkAuth();
+          await new Promise(resolve => setTimeout(resolve, 300));
+          await checkAuth();
           
           // Navigate to home
           navigate('/');
