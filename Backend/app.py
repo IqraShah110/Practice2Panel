@@ -42,7 +42,17 @@ app = Flask(__name__)
 load_dotenv()
 
 # Configure Flask session
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-production')
+secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-production')
+# Warn if using default secret key (security risk in production)
+if secret_key == 'your-secret-key-change-this-in-production':
+    import warnings
+    warnings.warn(
+        "SECRET_KEY is not set! Using default value. This is insecure for production. "
+        "Please set SECRET_KEY environment variable. "
+        "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\"",
+        UserWarning
+    )
+app.config['SECRET_KEY'] = secret_key
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
