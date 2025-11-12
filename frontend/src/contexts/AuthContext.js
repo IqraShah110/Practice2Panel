@@ -28,6 +28,15 @@ export const AuthProvider = ({ children }) => {
         credentials: 'include', // Include cookies for session
       });
 
+      // Handle network errors
+      if (!response.ok && response.status !== 401) {
+        console.error('Auth check failed:', response.status, response.statusText);
+        setUser(null);
+        setAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
       
       if (data.success && data.authenticated) {
@@ -39,8 +48,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      setUser(null);
-      setAuthenticated(false);
+      // Don't fail completely on network errors - might be backend sleeping
+      // Only clear auth if it's a real error, not just connection timeout
+      if (error.message && !error.message.includes('Failed to fetch')) {
+        setUser(null);
+        setAuthenticated(false);
+      }
     } finally {
       setLoading(false);
     }

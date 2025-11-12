@@ -39,8 +39,22 @@ const GoogleCallback = () => {
         const data = await response.json();
 
         if (data.success) {
-          // Refresh auth state
-          await checkAuth();
+          // Wait a moment for session cookie to be set
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Refresh auth state - try multiple times to ensure session is detected
+          let authChecked = false;
+          for (let i = 0; i < 3; i++) {
+            await checkAuth();
+            // Check if we're now authenticated
+            await new Promise(resolve => setTimeout(resolve, 300));
+            // Re-check auth status by calling checkAuth again
+            if (i < 2) {
+              await new Promise(resolve => setTimeout(resolve, 200));
+            }
+          }
+          
+          // Navigate to home
           navigate('/');
         } else {
           navigate('/login', { state: { error: data.message || 'Google login failed' } });

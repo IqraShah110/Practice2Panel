@@ -69,7 +69,8 @@ allowed_origins = [
     FRONTEND_URL.rstrip('/'),
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://practice2panel-frontend.onrender.com'  # Production frontend URL
+    'https://practice2panel-frontend-8ptb.onrender.com',  # Production frontend URL
+    'https://practice2panel-frontend.onrender.com'  # Fallback for other deployments
 ]
 
 CORS(app, 
