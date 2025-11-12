@@ -65,6 +65,20 @@ CORS(app,
 # Register auth blueprint
 app.register_blueprint(auth_bp)
 
+# Root route
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({
+        'message': 'Practice2Panel API is running',
+        'status': 'active',
+        'endpoints': {
+            'health': '/api/health',
+            'questions': '/api/questions/<interview_type>/<skill>',
+            'chatbot': '/api/chatbot',
+            'auth': '/api/auth/*'
+        }
+    }), 200
+
 # Initialize users table on startup
 try:
     create_users_table()
