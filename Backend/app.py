@@ -39,7 +39,16 @@ def execute_db_query(query, params=None, fetch_one=False, fetch_all=False):
             conn.close()
 
 app = Flask(__name__)
-load_dotenv()
+
+# Load .env file from the Backend directory (explicit path)
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(backend_dir, '.env')
+if os.path.exists(env_path):
+    load_dotenv(env_path, override=True)
+    logger.info(f"✓ Loading .env from: {env_path}")
+else:
+    logger.warning(f"⚠ .env file not found at: {env_path}, trying current directory...")
+    load_dotenv()  # Fallback to current directory
 
 # Configure Flask session
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-this-in-production')
@@ -65,12 +74,32 @@ CORS(app,
 # Register auth blueprint
 app.register_blueprint(auth_bp)
 
-# Initialize users table on startup
+# Initialize users table on startup (non-blocking)
+def initialize_database():
+    """Initialize database tables on startup - non-blocking"""
+    try:
+        success, error = create_users_table()
+        if success:
+            logger.info("✓ Users table initialized")
+            return True
+        else:
+            logger.warning(f"⚠ Warning: Failed to initialize users table: {error}")
+            return False
+    except RuntimeError as e:
+        # Database connection not available - this is OK, will retry on first use
+        logger.warning(f"⚠ Database not available on startup: {str(e)}")
+        logger.info("Database will be initialized on first connection")
+        return False
+    except Exception as e:
+        logger.warning(f"⚠ Warning: Failed to initialize users table: {e}")
+        return False
+
+# Try to initialize on startup, but don't block app startup
 try:
-    create_users_table()
-    print("✓ Users table initialized")
+    initialize_database()
 except Exception as e:
-    print(f"⚠ Warning: Failed to initialize users table: {e}")
+    logger.warning(f"⚠ Database initialization error: {e}")
+    logger.info("App will continue - database will be initialized on first use")
 
 def get_questions_from_table(table_name):
     """Fetch questions from database table by table name"""
@@ -252,6 +281,16 @@ def process_voice():
             'success': False,
             'message': f'Server error during voice processing: {str(e)}'
         }), 500
+
+@app.route('/', methods=['GET'])
+def root():
+    """Root endpoint for Render health checks"""
+    return jsonify({
+        'success': True,
+        'message': 'Practice2Panel API is running',
+        'status': 'healthy',
+        'version': '1.0.0'
+    }), 200
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

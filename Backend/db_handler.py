@@ -1,13 +1,41 @@
 import psycopg2
 from psycopg2 import sql
 import os
+import logging
 from dotenv import load_dotenv
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def get_pg_connection():
-    load_dotenv()
+    # Load .env file from the Backend directory (explicit path)
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    env_path = os.path.join(backend_dir, '.env')
+    
+    # Try loading from Backend directory first
+    if os.path.exists(env_path):
+        load_dotenv(env_path, override=True)
+        logger.info(f"✓ Loading .env from: {env_path}")
+    else:
+        logger.warning(f"⚠ .env file not found at: {env_path}")
+    
+    # Also try loading from current directory (for compatibility)
+    load_dotenv(override=False)
     
     # Check for DATABASE_URL first (preferred for production/cloud deployments)
     database_url = os.getenv("DATABASE_URL")
+    
+    # Strip quotes if present (dotenv might include them)
+    if database_url:
+        database_url = database_url.strip('"').strip("'")
+    
+    # Debug: Log if DATABASE_URL is found (without exposing the actual URL)
+    if database_url:
+        logger.info(f"✓ DATABASE_URL found (length: {len(database_url)})")
+    else:
+        logger.warning("⚠ DATABASE_URL not found in environment variables")
+        logger.warning("⚠ Checking for individual database parameters...")
     
     if database_url:
         # Parse the database URL

@@ -21,13 +21,17 @@ git commit -m "Add gunicorn for Render deployment"
 git push origin main
 ```
 
-### 2. Create PostgreSQL Database on Render
+### 2. Get Your Neon Database URL
 
-1. Go to [render.com](https://render.com) → Dashboard
-2. Click **"New +"** → **"PostgreSQL"**
-3. Name: `practice2panel-db`
-4. Click **"Create Database"**
-5. **Copy the Internal Database URL** (you'll need this!)
+Since you already have a database on **Neon**, use that instead:
+
+1. Go to your [Neon Dashboard](https://console.neon.tech)
+2. Select your project
+3. Go to **"Connection Details"** or **"Connection String"**
+4. Copy the **Connection String** (should include `?sslmode=require`)
+5. It looks like: `postgresql://user:pass@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`
+
+**Note:** You don't need to create a database on Render - use your existing Neon database!
 
 ### 3. Deploy Backend
 
@@ -40,7 +44,7 @@ git push origin main
    - **Start Command**: `gunicorn app:app --bind 0.0.0.0:$PORT`
 4. Add Environment Variables:
    ```
-   DATABASE_URL=<paste-internal-db-url>
+   DATABASE_URL=<paste-your-neon-connection-string>
    FLASK_DEBUG=False
    SECRET_KEY=<generate-strong-key>
    PORT=10000
@@ -79,7 +83,7 @@ python -c "import secrets; print(secrets.token_hex(32))"
 ## 📋 Environment Variables Checklist
 
 ### Backend (Required)
-- [ ] `DATABASE_URL` - From Render PostgreSQL
+- [ ] `DATABASE_URL` - From Neon (your existing database)
 - [ ] `FLASK_DEBUG=False`
 - [ ] `SECRET_KEY` - Generated strong key
 - [ ] `PORT=10000`
